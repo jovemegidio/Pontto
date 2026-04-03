@@ -9,7 +9,29 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         :root{--p-primary:#6366f1;--p-primary-light:#818cf8;--p-primary-dark:#4f46e5;--p-accent:#f59e0b;--p-success:#10b981;--p-danger:#ef4444;--p-info:#3b82f6;--p-surface:#ffffff;--p-bg:#f8fafc;--p-text:#0f172a;--p-muted:#64748b;--p-border:#e2e8f0;--p-shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);--p-shadow-lg:0 10px 25px rgba(0,0,0,.08);--p-radius:16px;--p-radius-sm:10px;--p-grad:linear-gradient(135deg,#6366f1,#8b5cf6,#a78bfa)}
-        [data-bs-theme="dark"]{--p-surface:#1e1b4b;--p-bg:#0f0d2e;--p-text:#e2e8f0;--p-muted:#94a3b8;--p-border:#312e81;--p-shadow:0 1px 3px rgba(0,0,0,.3);--p-shadow-lg:0 10px 25px rgba(0,0,0,.4)}
+        [data-bs-theme="dark"]{--p-surface:#1e1b4b;--p-bg:#0f0d2e;--p-text:#e2e8f0;--p-muted:#94a3b8;--p-border:#312e81;--p-shadow:0 1px 3px rgba(0,0,0,.3);--p-shadow-lg:0 10px 25px rgba(0,0,0,.4);--p-chart-grid:rgba(255,255,255,.08);--p-chart-text:#94a3b8}
+        :root{--p-chart-grid:rgba(0,0,0,.05);--p-chart-text:#64748b}
+        [data-bs-theme="dark"] .table{--bs-table-bg:transparent;--bs-table-color:var(--p-text);--bs-table-border-color:var(--p-border)}
+        [data-bs-theme="dark"] .form-control,[data-bs-theme="dark"] .form-select{background-color:var(--p-bg);border-color:var(--p-border);color:var(--p-text)}
+        [data-bs-theme="dark"] .form-control:focus,[data-bs-theme="dark"] .form-select:focus{background-color:var(--p-bg);border-color:var(--p-primary);color:var(--p-text)}
+        [data-bs-theme="dark"] .form-control::placeholder{color:var(--p-muted)}
+        [data-bs-theme="dark"] .form-control:disabled,[data-bs-theme="dark"] .form-select:disabled{background-color:var(--p-surface);opacity:.65}
+        [data-bs-theme="dark"] .form-check-input{background-color:var(--p-surface);border-color:var(--p-border)}
+        [data-bs-theme="dark"] .form-check-input:checked{background-color:var(--p-primary);border-color:var(--p-primary)}
+        [data-bs-theme="dark"] .dropdown-menu:not(.dropdown-menu-dark){background:var(--p-surface);border-color:var(--p-border)}
+        [data-bs-theme="dark"] .dropdown-menu:not(.dropdown-menu-dark) .dropdown-item{color:var(--p-text)}
+        [data-bs-theme="dark"] .dropdown-menu:not(.dropdown-menu-dark) .dropdown-item:hover{background:rgba(99,102,241,.15)}
+        [data-bs-theme="dark"] .dropdown-menu:not(.dropdown-menu-dark) .dropdown-divider{border-color:var(--p-border)}
+        [data-bs-theme="dark"] .btn-outline-secondary{color:var(--p-muted);border-color:var(--p-border)}
+        [data-bs-theme="dark"] .btn-outline-secondary:hover{background:var(--p-surface);color:var(--p-text)}
+        [data-bs-theme="dark"] .btn-outline-primary{color:var(--p-primary-light);border-color:var(--p-primary)}
+        [data-bs-theme="dark"] .border-bottom{border-color:var(--p-border)!important}
+        [data-bs-theme="dark"] .text-muted{color:var(--p-muted)!important}
+        [data-bs-theme="dark"] .modal-content{background:var(--p-surface);color:var(--p-text)}
+        [data-bs-theme="dark"] hr{border-color:var(--p-border)}
+        .pontto-footer{background:var(--p-surface);border-top:1px solid var(--p-border);padding:1.5rem 0;margin-top:2rem;color:var(--p-muted);font-size:.82rem}
+        .pontto-footer a{color:var(--p-primary);text-decoration:none;font-weight:500}
+        .pontto-footer a:hover{color:var(--p-primary-light);text-decoration:underline}
         *{font-family:'Inter',system-ui,-apple-system,sans-serif}
         body{background:var(--p-bg);color:var(--p-text);overflow-x:hidden}
         .pontto-nav{background:var(--p-grad);padding:.6rem 0;box-shadow:0 4px 20px rgba(99,102,241,.3);position:sticky;top:0;z-index:1050}
@@ -145,10 +167,24 @@
         </div></div>{% endif %}{% endwith %}
         {% block content %}{% endblock %}
     </div>
+    <footer class="pontto-footer">
+        <div class="container-fluid px-3 px-lg-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <span>Pontto v2.0 &copy; 2024 — Sistema Inteligente de Ponto Eletrônico</span>
+                <div class="d-flex gap-3">
+                    <a href="https://github.com/jovemegidio/Pontto" target="_blank"><i class="bi bi-github me-1"></i>GitHub</a>
+                    {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('auth.perfil') }}"><i class="bi bi-person me-1"></i>Perfil</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </footer>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script>
     function toggleTheme(){fetch('/api/toggle-theme',{method:'POST'}).then(r=>r.json()).then(d=>{document.documentElement.setAttribute('data-bs-theme',d.tema);location.reload()})}
+    function chartTheme(){const dk=document.documentElement.getAttribute('data-bs-theme')==='dark';return{grid:dk?'rgba(255,255,255,.08)':'rgba(0,0,0,.05)',text:dk?'#94a3b8':'#64748b'}}
     </script>
     {% block extra_js %}{% endblock %}
 </body>

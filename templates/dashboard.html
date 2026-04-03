@@ -312,7 +312,8 @@ function resetFocus(){focusRemaining=focusDuration;focusRunning=false;clearInter
 fetch('/api/horas-semana').then(r=>r.json()).then(data=>{
     const ctx=document.getElementById('chartSemana');
     if(!ctx)return;
-    new Chart(ctx,{type:'bar',data:{labels:data.labels,datasets:[{label:'Horas',data:data.dados,backgroundColor:'rgba(99,102,241,0.7)',borderColor:'#6366f1',borderWidth:2,borderRadius:8,borderSkipped:false},{label:'Meta (8h)',data:Array(7).fill(8),type:'line',borderColor:'#f59e0b',borderDash:[5,5],pointRadius:0,borderWidth:2,fill:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{usePointStyle:true,padding:15}}},scales:{y:{beginAtZero:true,max:12,grid:{color:'rgba(0,0,0,0.05)'}},x:{grid:{display:false}}}}});
+    const ct=chartTheme();
+    new Chart(ctx,{type:'bar',data:{labels:data.labels,datasets:[{label:'Horas',data:data.dados,backgroundColor:'rgba(99,102,241,0.7)',borderColor:'#6366f1',borderWidth:2,borderRadius:8,borderSkipped:false},{label:'Meta (8h)',data:Array(7).fill(8),type:'line',borderColor:'#f59e0b',borderDash:[5,5],pointRadius:0,borderWidth:2,fill:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{usePointStyle:true,padding:15,color:ct.text}}},scales:{y:{beginAtZero:true,max:12,grid:{color:ct.grid},ticks:{color:ct.text}},x:{grid:{display:false},ticks:{color:ct.text}}}}});
 });
 </script>
 {% endblock %}

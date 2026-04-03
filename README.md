@@ -17,6 +17,8 @@
 
 <p><strong>Sistema de ponto eletrônico com gamificação, wellness tracking e analytics em tempo real.</strong></p>
 
+<p><em>Aplicação web full-stack desenvolvida com Python/Flask que transforma o controle de jornada em uma<br>experiência inteligente — combinando registro de ponto, mood tracker, focus timer (Pomodoro),<br>conquistas gamificadas, wellness score e dashboards administrativos em tempo real.</em></p>
+
 <p>
   <a href="https://jovemegidio.github.io/Pontto/">
     <img src="https://img.shields.io/badge/▶%20VER%20DEMO%20ONLINE-6366f1?style=for-the-badge&logoColor=white" alt="Demo"/>
