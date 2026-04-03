@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Relatórios - Pontto{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+<div class="col-xl-11">
+    <div class="pc mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <span><i class="bi bi-bar-chart-line me-2"></i>Relatório Mensal</span>
+            <form method="GET" class="d-flex gap-2">
+                <select name="mes" class="form-select form-select-sm" style="width:auto;border-radius:8px">
+                    {% for m in range(1, 13) %}
+                    <option value="{{ m }}" {% if m == mes %}selected{% endif %}>{{ ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'][m-1] }}</option>
+                    {% endfor %}
+                </select>
+                <select name="ano" class="form-select form-select-sm" style="width:auto;border-radius:8px">
+                    {% for a in range(2024, 2028) %}
+                    <option value="{{ a }}" {% if a == ano %}selected{% endif %}>{{ a }}</option>
+                    {% endfor %}
+                </select>
+                <select name="usuario_id" class="form-select form-select-sm" style="width:auto;border-radius:8px">
+                    <option value="0">Todos</option>
+                    {% for u in usuarios %}
+                    <option value="{{ u.id }}" {% if u.id == usuario_id %}selected{% endif %}>{{ u.nome }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-pontto btn-sm"><i class="bi bi-search"></i></button>
+            </form>
+        </div>
+        <div class="card-body p-0">
+            {% if resumo %}
+            <div class="table-responsive">
+                <table class="table ptable mb-0">
+                    <thead><tr><th>Funcionário</th><th>Departamento</th><th>Dias</th><th>Total Horas</th><th>Wellness</th></tr></thead>
+                    <tbody>
+                    {% for item in resumo %}
+                    <tr>
+                        <td><div class="d-flex align-items-center gap-2">
+                            <div class="avatar" style="background:{{ item.usuario.avatar_cor }};width:30px;height:30px;font-size:.65rem">{{ item.usuario.iniciais }}</div>
+                            <span class="fw-semibold">{{ item.usuario.nome }}</span>
+                        </div></td>
+                        <td>{{ item.usuario.departamento or '—' }}</td>
+                        <td>{{ item.total_dias }}</td>
+                        <td class="fw-bold" style="color:var(--p-primary)">{{ '%d:%02d' % (item.total_horas.total_seconds() // 3600, (item.total_horas.total_seconds() % 3600) // 60) }}</td>
+                        <td>
+                            {% set ws = item.usuario.wellness_score() %}
+                            <div class="d-flex align-items-center gap-2">
+                                <div style="width:60px;height:6px;border-radius:3px;background:var(--p-border);overflow:hidden">
+                                    <div style="width:{{ ws }}%;height:100%;border-radius:3px;background:{% if ws >= 70 %}var(--p-success){% elif ws >= 40 %}var(--p-accent){% else %}var(--p-danger){% endif %}"></div>
+                                </div>
+                                <small class="fw-bold">{{ ws }}</small>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5 text-muted"><i class="bi bi-bar-chart fs-1 d-block mb-2 opacity-25"></i>Nenhum dado para o período</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}

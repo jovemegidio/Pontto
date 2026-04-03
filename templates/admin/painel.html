@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Admin - Pontto{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+<div class="col-xl-11">
+    <h4 class="fw-bold mb-4"><i class="bi bi-speedometer2 me-2" style="color:var(--p-primary)"></i>Painel Administrativo</h4>
+
+    <!-- Stats -->
+    <div class="row mb-4 g-3">
+        <div class="col-md-4">
+            <div class="pc stat-card">
+                <div class="stat-icon" style="background:rgba(99,102,241,.1);color:var(--p-primary)"><i class="bi bi-people"></i></div>
+                <div class="stat-number" style="color:var(--p-primary)">{{ total_funcionarios }}</div>
+                <div class="stat-label">Funcionários Ativos</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="pc stat-card">
+                <div class="stat-icon" style="background:rgba(16,185,129,.1);color:var(--p-success)"><i class="bi bi-person-check"></i></div>
+                <div class="stat-number" style="color:var(--p-success)">{{ usuarios_hoje }}</div>
+                <div class="stat-label">Presentes Hoje</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="pc stat-card">
+                <div class="stat-icon" style="background:rgba(245,158,11,.1);color:var(--p-accent)"><i class="bi bi-clock-history"></i></div>
+                <div class="stat-number" style="color:var(--p-accent)">{{ registros_hoje }}</div>
+                <div class="stat-label">Registros Hoje</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Team Presence -->
+    <div class="pc mb-4">
+        <div class="card-header d-flex align-items-center gap-2">
+            <i class="bi bi-broadcast"></i> Presença da Equipe (Tempo Real)
+            <span class="badge bg-success bg-opacity-10 text-success ms-auto" style="border-radius:50px" id="presenceStatus">
+                <i class="bi bi-circle-fill me-1" style="font-size:.5rem"></i>Ao vivo
+            </span>
+        </div>
+        <div class="card-body" id="teamPresence">
+            <div class="text-center text-muted py-3">Carregando...</div>
+        </div>
+    </div>
+
+    <!-- Activity -->
+    <div class="pc">
+        <div class="card-header d-flex align-items-center gap-2"><i class="bi bi-activity"></i> Atividade de Hoje</div>
+        <div class="card-body p-0">
+            {% if ultimos_registros %}
+            <div class="table-responsive">
+                <table class="table ptable mb-0">
+                    <thead><tr><th>Funcionário</th><th>Tipo</th><th>Horário</th><th>IP</th></tr></thead>
+                    <tbody>
+                    {% for reg in ultimos_registros %}
+                    <tr>
+                        <td><div class="d-flex align-items-center gap-2">
+                            <div class="avatar" style="background:{{ reg.usuario.avatar_cor }};width:30px;height:30px;font-size:.65rem">{{ reg.usuario.iniciais }}</div>
+                            <span class="fw-semibold">{{ reg.usuario.nome }}</span>
+                        </div></td>
+                        <td><span class="badge badge-tipo tipo-{{ reg.tipo }}">{{ label_tipo(reg.tipo) }}</span></td>
+                        <td class="fw-medium">{{ reg.data_hora.strftime('%H:%M:%S') }}</td>
+                        <td class="text-muted small">{{ reg.ip_address }}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-4 text-muted"><i class="bi bi-inbox fs-1 d-block mb-2 opacity-25"></i>Nenhum registro hoje</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+function loadPresence(){
+    fetch('/api/team-presence').then(r=>r.json()).then(data=>{
+        const el=document.getElementById('teamPresence');
+        if(!data.length){el.innerHTML='<p class="text-muted text-center">Nenhum funcionário encontrado</p>';return}
+        let html='<div class="row g-2">';
+        data.forEach(u=>{
+            const colors={presente:'#10b981',almoco:'#f59e0b',saiu:'#94a3b8',ausente:'#e2e8f0'};
+            const labels={presente:'Presente',almoco:'Almoço',saiu:'Saiu',ausente:'Ausente'};
+            html+=`<div class="col-md-3 col-sm-6"><div class="d-flex align-items-center gap-2 p-2 rounded-3" style="border:1px solid var(--p-border)">
+                <div class="avatar" style="background:${u.cor};width:36px;height:36px;font-size:.75rem">${u.iniciais}</div>
+                <div class="flex-grow-1"><div class="fw-semibold" style="font-size:.85rem">${u.nome}</div>
+                <div class="d-flex align-items-center gap-1"><span class="presence-dot ${u.status}"></span><small class="text-muted">${labels[u.status]}${u.ultima_acao?' · '+u.ultima_acao:''}</small></div>
+                </div></div></div>`;
+        });
+        html+='</div>';el.innerHTML=html;
+    });
+}
+loadPresence();setInterval(loadPresence,30000);
+</script>
+{% endblock %}

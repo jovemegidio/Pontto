@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Editar' if usuario else 'Novo' }} Funcionário - Pontto{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="pc">
+            <div class="card-header">
+                <i class="bi bi-person-{{ 'gear' if usuario else 'plus' }} me-2"></i>{{ 'Editar' if usuario else 'Novo' }} Funcionário
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-uppercase">Nome <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="nome" value="{{ usuario.nome if usuario else '' }}" required style="border-radius:var(--p-radius-sm);border:2px solid var(--p-border)">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-uppercase">E-mail <span class="text-danger">*</span></label>
+                        <input type="email" class="form-control" name="email" value="{{ usuario.email if usuario else '' }}" required style="border-radius:var(--p-radius-sm);border:2px solid var(--p-border)">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-uppercase">Senha {% if not usuario %}<span class="text-danger">*</span>{% endif %}</label>
+                        <input type="password" class="form-control" name="senha" minlength="6" {{ 'required' if not usuario else '' }}
+                               placeholder="{{ 'Deixe em branco para manter' if usuario else '' }}" style="border-radius:var(--p-radius-sm);border:2px solid var(--p-border)">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold small text-uppercase">Cargo</label>
+                            <input type="text" class="form-control" name="cargo" value="{{ usuario.cargo if usuario else '' }}" style="border-radius:var(--p-radius-sm);border:2px solid var(--p-border)">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold small text-uppercase">Departamento</label>
+                            <input type="text" class="form-control" name="departamento" value="{{ usuario.departamento if usuario else '' }}" style="border-radius:var(--p-radius-sm);border:2px solid var(--p-border)">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="is_admin" id="is_admin" {{ 'checked' if usuario and usuario.is_admin }}>
+                            <label class="form-check-label fw-semibold" for="is_admin">Administrador</label>
+                        </div>
+                    </div>
+                    {% if usuario %}
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="ativo" id="ativo" {{ 'checked' if usuario.ativo }}>
+                            <label class="form-check-label fw-semibold" for="ativo">Ativo</label>
+                        </div>
+                    </div>
+                    {% endif %}
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-pontto"><i class="bi bi-check-lg me-1"></i>Salvar</button>
+                        <a href="{{ url_for('admin.funcionarios') }}" class="btn btn-outline-secondary" style="border-radius:var(--p-radius-sm)">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Funcionários - Pontto{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+<div class="col-xl-11">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="fw-bold mb-0"><i class="bi bi-people me-2" style="color:var(--p-primary)"></i>Funcionários</h4>
+        <a href="{{ url_for('admin.novo_funcionario') }}" class="btn btn-pontto"><i class="bi bi-person-plus me-1"></i>Novo Funcionário</a>
+    </div>
+    <div class="pc">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table ptable mb-0">
+                    <thead><tr><th>Funcionário</th><th>E-mail</th><th>Cargo</th><th>Depto</th><th>Status</th><th>Nível</th><th>Streak</th><th></th></tr></thead>
+                    <tbody>
+                    {% for u in usuarios %}
+                    <tr>
+                        <td><div class="d-flex align-items-center gap-2">
+                            <div class="avatar" style="background:{{ u.avatar_cor }};width:32px;height:32px;font-size:.7rem">{{ u.iniciais }}</div>
+                            <div><div class="fw-semibold">{{ u.nome }}</div>{% if u.is_admin %}<small class="text-primary fw-bold">Admin</small>{% endif %}</div>
+                        </div></td>
+                        <td class="text-muted">{{ u.email }}</td>
+                        <td>{{ u.cargo or '—' }}</td>
+                        <td>{{ u.departamento or '—' }}</td>
+                        <td>{% if u.ativo %}<span class="badge bg-success bg-opacity-10 text-success" style="border-radius:50px">Ativo</span>{% else %}<span class="badge bg-secondary bg-opacity-10 text-secondary" style="border-radius:50px">Inativo</span>{% endif %}</td>
+                        <td><span class="badge bg-primary bg-opacity-10 text-primary" style="border-radius:50px">Nv {{ u.nivel }}</span></td>
+                        <td>🔥 {{ u.streak_atual }}</td>
+                        <td><a href="{{ url_for('admin.editar_funcionario', id=u.id) }}" class="btn btn-sm btn-outline-primary" style="border-radius:8px"><i class="bi bi-pencil"></i></a></td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}

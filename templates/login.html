@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pontto - Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        *{font-family:'Inter',system-ui,-apple-system,sans-serif}
+        body{min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+        body::before{content:'';position:fixed;inset:0;background:linear-gradient(135deg,#6366f1 0%,#4f46e5 30%,#7c3aed 60%,#8b5cf6 100%);z-index:0}
+        body::after{content:'';position:fixed;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");z-index:0}
+        .orb{position:fixed;border-radius:50%;filter:blur(80px);opacity:.3;z-index:0}
+        .orb-1{width:400px;height:400px;background:#a78bfa;top:-100px;right:-100px;animation:float1 8s infinite alternate}
+        .orb-2{width:300px;height:300px;background:#6366f1;bottom:-50px;left:-50px;animation:float2 10s infinite alternate}
+        .orb-3{width:200px;height:200px;background:#f59e0b;top:50%;left:50%;animation:float3 6s infinite alternate}
+        @keyframes float1{from{transform:translate(0,0)}to{transform:translate(-30px,30px)}}
+        @keyframes float2{from{transform:translate(0,0)}to{transform:translate(20px,-20px)}}
+        @keyframes float3{from{transform:translate(-50%,-50%) scale(1)}to{transform:translate(-50%,-50%) scale(1.2)}}
+
+        .login-card{background:rgba(255,255,255,.95);backdrop-filter:blur(20px);border-radius:24px;box-shadow:0 25px 80px rgba(0,0,0,.2);padding:3rem;width:100%;max-width:440px;position:relative;z-index:1;animation:slideUp .6s ease-out}
+        [data-bs-theme="dark"] .login-card{background:rgba(30,27,75,.9)}
+        @keyframes slideUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+        .login-header{text-align:center;margin-bottom:2rem}
+        .login-logo{font-size:2.2rem;font-weight:900;letter-spacing:-1px;margin-bottom:.25rem}
+        .login-logo .dot{display:inline-block;width:10px;height:10px;background:#f59e0b;border-radius:50%;animation:pdot 2s infinite}
+        @keyframes pdot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+        .login-header p{color:#64748b;font-size:.9rem}
+        .form-floating>.form-control{border:2px solid #e2e8f0;border-radius:12px;height:3.5rem;padding:1rem .75rem}
+        .form-floating>.form-control:focus{border-color:#6366f1;box-shadow:0 0 0 4px rgba(99,102,241,.1)}
+        .form-floating>label{padding:1rem .75rem}
+        .btn-login{background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;border-radius:12px;padding:.85rem;font-weight:700;font-size:1rem;width:100%;color:#fff;transition:.3s;box-shadow:0 4px 15px rgba(99,102,241,.3)}
+        .btn-login:hover{transform:translateY(-2px);box-shadow:0 6px 25px rgba(99,102,241,.4);color:#fff}
+    </style>
+</head>
+<body>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <div class="login-card">
+        <div class="login-header">
+            <div class="login-logo">Pont<span class="dot"></span>to</div>
+            <p>Sistema Inteligente de Ponto Eletrônico</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show border-0" role="alert" style="border-radius:10px;font-size:.9rem">
+            {{ message }}<button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}{% endif %}{% endwith %}
+
+        <form method="POST">
+            <div class="form-floating mb-3">
+                <input type="email" class="form-control" id="email" name="email" placeholder="E-mail" required autofocus>
+                <label for="email"><i class="bi bi-envelope me-2"></i>E-mail</label>
+            </div>
+            <div class="form-floating mb-4">
+                <input type="password" class="form-control" id="senha" name="senha" placeholder="Senha" required>
+                <label for="senha"><i class="bi bi-lock me-2"></i>Senha</label>
+            </div>
+            <button type="submit" class="btn btn-login">
+                <i class="bi bi-arrow-right-circle me-2"></i>Entrar
+            </button>
+        </form>
+
+        <div class="text-center mt-4">
+            <small class="text-muted">Pontto v2.0 · Sistema Inteligente de Ponto</small>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

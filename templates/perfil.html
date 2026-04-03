@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Meu Perfil - Pontto{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <!-- Profile Header -->
+        <div class="pc mb-4">
+            <div class="card-body text-center py-4">
+                <div class="avatar mx-auto mb-3" style="width:80px;height:80px;font-size:1.8rem;background:{{ current_user.avatar_cor }}">
+                    {{ current_user.iniciais }}
+                </div>
+                <h4 class="fw-bold mb-1">{{ current_user.nome }}</h4>
+                <p class="text-muted mb-2">{{ current_user.cargo }} · {{ current_user.departamento }}</p>
+                <div class="d-flex justify-content-center gap-4">
+                    <div><span class="fw-bold" style="color:var(--p-primary)">{{ current_user.nivel }}</span><br><small class="text-muted">Nível</small></div>
+                    <div><span class="fw-bold" style="color:var(--p-accent)">{{ current_user.xp }}</span><br><small class="text-muted">XP Total</small></div>
+                    <div><span class="fw-bold" style="color:var(--p-danger)">{{ current_user.streak_atual }}</span><br><small class="text-muted">Streak</small></div>
+                    <div><span class="fw-bold" style="color:var(--p-success)">{{ current_user.maior_streak }}</span><br><small class="text-muted">Maior Streak</small></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="pc">
+            <div class="card-header"><i class="bi bi-pencil-square me-2"></i>Editar Perfil</div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-uppercase">Nome</label>
+                        <input type="text" class="form-control" name="nome" value="{{ current_user.nome }}" required style="border-radius:var(--p-radius-sm);border:2px solid var(--p-border)">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold small text-uppercase">E-mail</label>
+                            <input type="email" class="form-control" value="{{ current_user.email }}" disabled style="border-radius:var(--p-radius-sm)">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label fw-semibold small text-uppercase">Cargo</label>
+                            <input type="text" class="form-control" value="{{ current_user.cargo }}" disabled style="border-radius:var(--p-radius-sm)">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label fw-semibold small text-uppercase">Depto</label>
+                            <input type="text" class="form-control" value="{{ current_user.departamento }}" disabled style="border-radius:var(--p-radius-sm)">
+                        </div>
+                    </div>
+                    <hr>
+                    <h6 class="fw-bold mb-3"><i class="bi bi-shield-lock me-2"></i>Alterar Senha</h6>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-semibold small">Senha Atual</label>
+                            <input type="password" class="form-control" name="senha_atual" style="border-radius:var(--p-radius-sm);border:2px solid var(--p-border)">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-semibold small">Nova Senha</label>
+                            <input type="password" class="form-control" name="nova_senha" minlength="6" style="border-radius:var(--p-radius-sm);border:2px solid var(--p-border)">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-semibold small">Confirmar</label>
+                            <input type="password" class="form-control" name="confirmar_senha" minlength="6" style="border-radius:var(--p-radius-sm);border:2px solid var(--p-border)">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-pontto"><i class="bi bi-check-lg me-1"></i>Salvar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

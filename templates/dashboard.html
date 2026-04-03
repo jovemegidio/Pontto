@@ -1,0 +1,318 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - Pontto{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+<div class="col-xl-11">
+
+<!-- Row 1: Clock + Registro -->
+<div class="pc mb-4 fade-in">
+    <div class="card-body text-center py-4">
+        <p class="text-muted mb-1 fw-medium">{{ hoje.strftime('%A, %d de %B de %Y') }}</p>
+        <div class="clock-display" id="clock">--:--:--</div>
+        {% if proximo_tipo %}
+        <form method="POST" action="{{ url_for('ponto.registrar') }}" class="mt-3">
+            <div class="row justify-content-center mb-3">
+                <div class="col-md-5">
+                    <input type="text" name="observacao" class="form-control" placeholder="Observação (opcional)" maxlength="500"
+                           style="border-radius:50px;padding:.5rem 1.2rem;border:2px solid var(--p-border)">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-ponto-big
+                {% if proximo_tipo == 'entrada' %}btn-success
+                {% elif proximo_tipo == 'saida' %}btn-danger
+                {% else %}btn-pontto{% endif %}">
+                <i class="bi {{ icone_tipo(proximo_tipo) }} me-2"></i>
+                Registrar {{ label_tipo(proximo_tipo) }}
+            </button>
+        </form>
+        {% else %}
+        <div class="mt-3">
+            <span class="badge bg-secondary bg-opacity-10 text-secondary fs-6 py-2 px-4" style="border-radius:50px">
+                <i class="bi bi-check-circle me-1"></i>Dia completo — todos os registros realizados
+            </span>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Row 2: Stats + Wellness + Mood -->
+<div class="row mb-4 g-3">
+    <div class="col-md-3">
+        <div class="pc stat-card">
+            <div class="stat-icon" style="background:rgba(99,102,241,.1);color:var(--p-primary)"><i class="bi bi-clock-history"></i></div>
+            <div class="stat-number" style="color:var(--p-primary)">
+                {{ '%d:%02d' % (horas_trabalhadas.total_seconds() // 3600, (horas_trabalhadas.total_seconds() % 3600) // 60) }}
+            </div>
+            <div class="stat-label">Horas Hoje</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="pc stat-card">
+            <div class="stat-icon" style="background:rgba(16,185,129,.1);color:var(--p-success)"><i class="bi bi-check2-all"></i></div>
+            <div class="stat-number" style="color:var(--p-success)">{{ registros_hoje|length }}/4</div>
+            <div class="stat-label">Registros</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="pc stat-card">
+            <div class="stat-icon" style="background:rgba(245,158,11,.1);color:var(--p-accent)"><i class="bi bi-fire"></i></div>
+            <div class="stat-number" style="color:var(--p-accent)">{{ current_user.streak_atual }}</div>
+            <div class="stat-label">Streak (dias)</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="pc stat-card">
+            <div class="wellness-ring">
+                <svg width="120" height="120" viewBox="0 0 120 120">
+                    <circle cx="60" cy="60" r="50" fill="none" stroke="var(--p-border)" stroke-width="8"/>
+                    <circle cx="60" cy="60" r="50" fill="none"
+                        stroke="{% if wellness >= 70 %}var(--p-success){% elif wellness >= 40 %}var(--p-accent){% else %}var(--p-danger){% endif %}"
+                        stroke-width="8" stroke-linecap="round"
+                        stroke-dasharray="{{ 314 * wellness / 100 }} 314"/>
+                </svg>
+                <div class="ring-text">
+                    <div class="ring-number" style="color:{% if wellness >= 70 %}var(--p-success){% elif wellness >= 40 %}var(--p-accent){% else %}var(--p-danger){% endif %}">{{ wellness }}</div>
+                    <div class="ring-label">Wellness</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Row 3: Registros Hoje + Mood + Focus -->
+<div class="row mb-4 g-3">
+    <!-- Registros de Hoje -->
+    <div class="col-lg-5">
+        <div class="pc h-100">
+            <div class="card-header d-flex align-items-center gap-2">
+                <i class="bi bi-list-check"></i> Registros de Hoje
+            </div>
+            <div class="card-body p-0">
+                {% if registros_hoje %}
+                <div class="table-responsive">
+                    <table class="table ptable mb-0">
+                        <thead><tr><th>Tipo</th><th>Horário</th><th>Obs</th></tr></thead>
+                        <tbody>
+                        {% for reg in registros_hoje %}
+                        <tr>
+                            <td><span class="badge badge-tipo tipo-{{ reg.tipo }}"><i class="bi {{ icone_tipo(reg.tipo) }} me-1"></i>{{ label_tipo(reg.tipo) }}</span></td>
+                            <td class="fw-bold">{{ reg.data_hora.strftime('%H:%M:%S') }}</td>
+                            <td class="text-muted small">{{ reg.observacao or '—' }}</td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4 text-muted">
+                    <i class="bi bi-inbox fs-1 d-block mb-2 opacity-25"></i>
+                    <span class="fw-medium">Nenhum registro hoje</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Mood Tracker -->
+    <div class="col-lg-4">
+        <div class="pc h-100">
+            <div class="card-header d-flex align-items-center gap-2">
+                <i class="bi bi-emoji-smile"></i> Como você está?
+            </div>
+            <div class="card-body">
+                {% if mood_hoje %}
+                <div class="text-center">
+                    <div style="font-size:3rem">{{ mood_hoje.emoji_humor(mood_hoje.humor) }}</div>
+                    <p class="fw-semibold mb-1">{{ mood_hoje.label_humor(mood_hoje.humor) }}</p>
+                    <div class="d-flex justify-content-center gap-1 mb-2">
+                        {% for i in range(1, 6) %}
+                        <span style="font-size:1.2rem">{{ mood_hoje.emoji_energia(i) if i <= mood_hoje.energia else '⬜' }}</span>
+                        {% endfor %}
+                    </div>
+                    {% if mood_hoje.nota %}
+                    <p class="text-muted small fst-italic">"{{ mood_hoje.nota }}"</p>
+                    {% endif %}
+                    <span class="badge bg-success bg-opacity-10 text-success">Registrado hoje</span>
+                </div>
+                {% else %}
+                <form method="POST" action="{{ url_for('ponto.registrar_mood') }}">
+                    <p class="text-muted small mb-3">Registre seu humor e energia do dia para acompanhar seu bem-estar.</p>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-uppercase">Humor</label>
+                        <div class="d-flex justify-content-center gap-2" id="mood-humor">
+                            {% for i in range(1, 6) %}
+                            <button type="button" class="mood-btn {% if i == 3 %}active{% endif %}" data-val="{{ i }}"
+                                    onclick="selectMood('humor', {{ i }}, this)">
+                                {{ ['😞','😕','😐','😊','😄'][i-1] }}
+                            </button>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="humor" id="humor-val" value="3">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold small text-uppercase">Energia</label>
+                        <div class="d-flex justify-content-center gap-2" id="mood-energia">
+                            {% for i in range(1, 6) %}
+                            <button type="button" class="mood-btn {% if i == 3 %}active{% endif %}" data-val="{{ i }}"
+                                    onclick="selectMood('energia', {{ i }}, this)">
+                                {{ ['🔋','🪫','⚡','🔥','🚀'][i-1] }}
+                            </button>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" name="energia" id="energia-val" value="3">
+                    </div>
+                    <input type="text" name="nota" class="form-control form-control-sm mb-3" placeholder="Nota sobre o dia (opcional)" maxlength="300"
+                           style="border-radius:8px;border:2px solid var(--p-border)">
+                    <button type="submit" class="btn btn-pontto btn-sm w-100">
+                        <i class="bi bi-heart-pulse me-1"></i>Registrar Humor
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Focus Timer -->
+    <div class="col-lg-3">
+        <div class="pc h-100">
+            <div class="card-header d-flex align-items-center gap-2">
+                <i class="bi bi-bullseye"></i> Focus Timer
+            </div>
+            <div class="card-body text-center">
+                <div class="focus-circle mb-3" id="focusCircle">
+                    <div class="focus-time" id="focusTime">25:00</div>
+                    <small class="text-muted fw-medium">MINUTOS</small>
+                </div>
+                <div class="d-flex justify-content-center gap-2 mb-2">
+                    <button class="btn btn-sm btn-pontto" onclick="startFocus()" id="btnFocus">
+                        <i class="bi bi-play-fill"></i> Iniciar
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="resetFocus()">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </button>
+                </div>
+                <div class="d-flex justify-content-center gap-1 mb-2">
+                    <button class="btn btn-outline-primary btn-sm" style="border-radius:50px;font-size:.7rem" onclick="setFocusDuration(25)">25min</button>
+                    <button class="btn btn-outline-secondary btn-sm" style="border-radius:50px;font-size:.7rem" onclick="setFocusDuration(5)">5min</button>
+                    <button class="btn btn-outline-secondary btn-sm" style="border-radius:50px;font-size:.7rem" onclick="setFocusDuration(15)">15min</button>
+                </div>
+                <p class="text-muted small mb-0"><i class="bi bi-bullseye me-1"></i>{{ sessoes_foco_hoje }} sessões hoje</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Row 4: Chart + Conquistas Recentes -->
+<div class="row mb-4 g-3">
+    <div class="col-lg-8">
+        <div class="pc">
+            <div class="card-header d-flex align-items-center gap-2">
+                <i class="bi bi-graph-up"></i> Horas esta Semana
+            </div>
+            <div class="card-body">
+                <canvas id="chartSemana" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="pc h-100">
+            <div class="card-header d-flex align-items-center gap-2">
+                <i class="bi bi-trophy"></i> Conquistas Recentes
+            </div>
+            <div class="card-body">
+                {% if conquistas %}
+                {% for uc in conquistas %}
+                <div class="d-flex align-items-center gap-3 {% if not loop.last %}mb-3 pb-3 border-bottom{% endif %}">
+                    <span style="font-size:1.8rem">{{ uc.conquista.icone }}</span>
+                    <div>
+                        <div class="fw-bold" style="font-size:.9rem">{{ uc.conquista.nome }}</div>
+                        <div class="text-muted" style="font-size:.75rem">{{ uc.conquista.descricao }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="text-center text-muted py-3">
+                    <span style="font-size:2rem">🏅</span>
+                    <p class="small mt-2 mb-0">Registre pontos para desbloquear conquistas!</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Row 5: Últimos dias -->
+{% if ultimos_dias %}
+<div class="pc fade-in">
+    <div class="card-header d-flex align-items-center gap-2">
+        <i class="bi bi-calendar-week"></i> Últimos 7 Dias
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table ptable mb-0">
+                <thead>
+                    <tr><th>Data</th><th>Entrada</th><th>Saída Almoço</th><th>Volta Almoço</th><th>Saída</th><th>Total</th></tr>
+                </thead>
+                <tbody>
+                {% for dia in ultimos_dias %}
+                <tr>
+                    <td class="fw-semibold">{{ dia.data.strftime('%d/%m') }} <small class="text-muted">{{ ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'][dia.data.weekday()] }}</small></td>
+                    {% for tipo in ['entrada', 'saida_almoco', 'volta_almoco', 'saida'] %}
+                    <td>{% for r in dia.registros if r.tipo == tipo %}{{ r.data_hora.strftime('%H:%M') }}{% else %}—{% endfor %}</td>
+                    {% endfor %}
+                    <td class="fw-bold" style="color:var(--p-primary)">{{ '%d:%02d' % (dia.horas.total_seconds() // 3600, (dia.horas.total_seconds() % 3600) // 60) }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+</div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Clock
+function updateClock(){const n=new Date(),h=String(n.getHours()).padStart(2,'0'),m=String(n.getMinutes()).padStart(2,'0'),s=String(n.getSeconds()).padStart(2,'0');document.getElementById('clock').textContent=h+':'+m+':'+s}
+updateClock();setInterval(updateClock,1000);
+
+// Mood selector
+function selectMood(type,val,btn){
+    document.getElementById(type+'-val').value=val;
+    btn.closest('.d-flex').querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+}
+
+// Focus Timer
+let focusDuration=25*60,focusRemaining=25*60,focusInterval=null,focusRunning=false;
+function updateFocusDisplay(){const m=Math.floor(focusRemaining/60),s=focusRemaining%60;document.getElementById('focusTime').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')}
+function setFocusDuration(min){focusDuration=min*60;focusRemaining=min*60;focusRunning=false;clearInterval(focusInterval);document.getElementById('focusCircle').classList.remove('running');document.getElementById('btnFocus').innerHTML='<i class="bi bi-play-fill"></i> Iniciar';updateFocusDisplay()}
+function startFocus(){
+    if(focusRunning){focusRunning=false;clearInterval(focusInterval);document.getElementById('focusCircle').classList.remove('running');document.getElementById('btnFocus').innerHTML='<i class="bi bi-play-fill"></i> Continuar';return}
+    focusRunning=true;document.getElementById('focusCircle').classList.add('running');document.getElementById('btnFocus').innerHTML='<i class="bi bi-pause-fill"></i> Pausar';
+    focusInterval=setInterval(()=>{
+        focusRemaining--;updateFocusDisplay();
+        if(focusRemaining<=0){clearInterval(focusInterval);focusRunning=false;document.getElementById('focusCircle').classList.remove('running');
+            document.getElementById('btnFocus').innerHTML='<i class="bi bi-play-fill"></i> Iniciar';
+            // Complete focus session
+            const form=document.createElement('form');form.method='POST';form.action='{{ url_for("ponto.completar_foco") }}';
+            const d=document.createElement('input');d.name='duracao';d.value=Math.round(focusDuration/60);d.type='hidden';form.appendChild(d);
+            const t=document.createElement('input');t.name='tipo';t.value=focusDuration>=25*60?'foco':'pausa_curta';t.type='hidden';form.appendChild(t);
+            document.body.appendChild(form);form.submit();
+        }
+    },1000);
+}
+function resetFocus(){focusRemaining=focusDuration;focusRunning=false;clearInterval(focusInterval);document.getElementById('focusCircle').classList.remove('running');document.getElementById('btnFocus').innerHTML='<i class="bi bi-play-fill"></i> Iniciar';updateFocusDisplay()}
+
+// Weekly Chart
+fetch('/api/horas-semana').then(r=>r.json()).then(data=>{
+    const ctx=document.getElementById('chartSemana');
+    if(!ctx)return;
+    new Chart(ctx,{type:'bar',data:{labels:data.labels,datasets:[{label:'Horas',data:data.dados,backgroundColor:'rgba(99,102,241,0.7)',borderColor:'#6366f1',borderWidth:2,borderRadius:8,borderSkipped:false},{label:'Meta (8h)',data:Array(7).fill(8),type:'line',borderColor:'#f59e0b',borderDash:[5,5],pointRadius:0,borderWidth:2,fill:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{usePointStyle:true,padding:15}}},scales:{y:{beginAtZero:true,max:12,grid:{color:'rgba(0,0,0,0.05)'}},x:{grid:{display:false}}}}});
+});
+</script>
+{% endblock %}

@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pontto — Sistema Inteligente de Ponto Eletrônico</title>
+    <meta name="description" content="Sistema de ponto eletrônico com gamificação, wellness tracking e analytics em tempo real.">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root{--p:#6366f1;--p-l:#818cf8;--p-d:#4f46e5;--acc:#f59e0b;--ok:#10b981;--err:#ef4444;--info:#3b82f6;--surf:#fff;--bg:#f8fafc;--txt:#0f172a;--muted:#64748b;--border:#e2e8f0;--grad:linear-gradient(135deg,#6366f1,#8b5cf6,#a78bfa)}
+        [data-bs-theme=dark]{--surf:#1e1b4b;--bg:#0f0d2e;--txt:#e2e8f0;--muted:#94a3b8;--border:#312e81}
+        *{font-family:'Inter',system-ui,sans-serif}
+        body{background:var(--bg);color:var(--txt);overflow-x:hidden}
+
+        /* Hero */
+        .hero{background:var(--grad);min-height:100vh;display:flex;align-items:center;position:relative;overflow:hidden}
+        .hero::after{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")}
+        .hero .orb{position:absolute;border-radius:50%;filter:blur(100px);opacity:.25;z-index:0}
+        .hero .orb-1{width:500px;height:500px;background:#a78bfa;top:-150px;right:-100px;animation:f1 8s infinite alternate}
+        .hero .orb-2{width:350px;height:350px;background:#6366f1;bottom:-100px;left:-80px;animation:f2 10s infinite alternate}
+        .hero .orb-3{width:250px;height:250px;background:#f59e0b;top:40%;left:60%;animation:f3 6s infinite alternate}
+        @keyframes f1{from{transform:translate(0)}to{transform:translate(-30px,30px)}}
+        @keyframes f2{from{transform:translate(0)}to{transform:translate(20px,-20px)}}
+        @keyframes f3{from{transform:scale(1)}to{transform:scale(1.2)}}
+        .hero-content{position:relative;z-index:1}
+        .brand{font-size:4rem;font-weight:900;letter-spacing:-2px;color:#fff}
+        .brand .dot{display:inline-block;width:14px;height:14px;background:var(--acc);border-radius:50%;animation:pdot 2s infinite}
+        @keyframes pdot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+
+        /* Navbar Demo */
+        .demo-nav{background:var(--grad);padding:.6rem 0;box-shadow:0 4px 20px rgba(99,102,241,.3);position:sticky;top:0;z-index:1050}
+        .nav-brand{font-weight:800;font-size:1.3rem;color:#fff;text-decoration:none;display:flex;align-items:center;gap:.4rem}
+        .nav-brand .dot{width:7px;height:7px;background:var(--acc);border-radius:50%;animation:pdot 2s infinite}
+
+        /* Cards */
+        .pc{background:var(--surf);border:1px solid var(--border);border-radius:16px;box-shadow:0 1px 3px rgba(0,0,0,.06);transition:all .3s ease;overflow:hidden}
+        .pc:hover{box-shadow:0 10px 25px rgba(0,0,0,.08);transform:translateY(-3px)}
+        .pc .card-header{background:0 0;border-bottom:1px solid var(--border);padding:1.1rem 1.4rem;font-weight:700;font-size:.9rem}
+        .pc .card-body{padding:1.4rem}
+        .stat-card{text-align:center;padding:1.4rem 1rem}
+        .stat-card .stat-icon{width:48px;height:48px;border-radius:14px;display:inline-flex;align-items:center;justify-content:center;font-size:1.3rem;margin-bottom:.7rem}
+        .stat-card .stat-number{font-size:1.9rem;font-weight:800;line-height:1.1;letter-spacing:-1px}
+        .stat-card .stat-label{color:var(--muted);font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-top:.25rem}
+
+        /* Badges */
+        .badge-tipo{font-size:.72rem;padding:.35em .7em;border-radius:7px;font-weight:600}
+        .tipo-entrada{background:linear-gradient(135deg,#10b981,#059669);color:#fff}
+        .tipo-saida_almoco{background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff}
+        .tipo-volta_almoco{background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff}
+        .tipo-saida{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff}
+
+        /* Clock */
+        .clock-display{font-size:3.5rem;font-weight:900;letter-spacing:-2px;font-variant-numeric:tabular-nums;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+        /* Wellness Ring */
+        .wellness-ring{width:110px;height:110px;position:relative;margin:0 auto}
+        .wellness-ring svg{transform:rotate(-90deg)}
+        .wellness-ring .rt{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
+        .wellness-ring .rn{font-size:1.6rem;font-weight:800;line-height:1;color:var(--ok)}
+        .wellness-ring .rl{font-size:.6rem;color:var(--muted);text-transform:uppercase;font-weight:600}
+
+        /* Mood */
+        .mood-btn{width:44px;height:44px;border-radius:50%;border:3px solid var(--border);background:var(--surf);font-size:1.2rem;display:inline-flex;align-items:center;justify-content:center;transition:.2s;cursor:pointer}
+        .mood-btn.active{transform:scale(1.15);border-color:var(--p);box-shadow:0 0 0 4px rgba(99,102,241,.15)}
+
+        /* Focus */
+        .focus-circle{width:170px;height:170px;border-radius:50%;border:5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-direction:column;margin:0 auto}
+        .focus-circle.running{border-color:var(--p);animation:fglow 2s infinite alternate}
+        @keyframes fglow{from{box-shadow:0 0 10px rgba(99,102,241,.2)}to{box-shadow:0 0 30px rgba(99,102,241,.4)}}
+        .focus-time{font-size:2.5rem;font-weight:800;font-variant-numeric:tabular-nums}
+
+        /* Presence */
+        .presence-dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+        .presence-dot.presente{background:#10b981;box-shadow:0 0 6px rgba(16,185,129,.5)}
+        .presence-dot.almoco{background:#f59e0b}
+        .presence-dot.ausente{background:#e2e8f0}
+
+        /* Table */
+        .ptable th{background:var(--bg);font-weight:700;font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:.8rem 1rem;border:none}
+        .ptable td{padding:.8rem 1rem;border-color:var(--border);vertical-align:middle}
+
+        /* Conquista */
+        .conquista-card{text-align:center;padding:1.1rem;border-radius:16px;border:2px solid var(--border);transition:.3s}
+        .conquista-card.desbloqueada{border-color:var(--acc);background:linear-gradient(135deg,rgba(245,158,11,.04),rgba(99,102,241,.04))}
+        .conquista-card.bloqueada{opacity:.35;filter:grayscale(.8)}
+
+        /* Avatar */
+        .avatar{width:34px;height:34px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:.75rem;color:#fff;flex-shrink:0}
+
+        /* XP */
+        .xp-bar{background:var(--border);border-radius:50px;height:7px;overflow:hidden}
+        .xp-fill{height:100%;border-radius:50px;background:var(--grad)}
+
+        /* Streak */
+        .streak-badge{display:inline-flex;align-items:center;gap:.4rem;padding:.35rem .9rem;border-radius:50px;font-weight:700;font-size:.85rem}
+
+        /* Theme Toggle */
+        .theme-toggle{background:rgba(255,255,255,.15);border:none;color:#fff;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.2s}
+        .theme-toggle:hover{background:rgba(255,255,255,.25)}
+
+        /* Btn */
+        .btn-pontto{background:var(--grad);border:none;color:#fff;font-weight:600;padding:.55rem 1.4rem;border-radius:10px;box-shadow:0 4px 15px rgba(99,102,241,.3);transition:.3s}
+        .btn-pontto:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(99,102,241,.4);color:#fff}
+        .btn-ponto-big{font-size:1.15rem;padding:.9rem 2.5rem;border-radius:50px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+
+        /* Sections */
+        .section{padding:5rem 0}
+        .section-title{font-size:2rem;font-weight:800;letter-spacing:-1px;margin-bottom:.5rem}
+        .section-sub{color:var(--muted);font-size:1.05rem;max-width:600px}
+
+        /* Feature Cards */
+        .feat-card{padding:2rem 1.5rem;border-radius:16px;background:var(--surf);border:1px solid var(--border);transition:.3s;height:100%}
+        .feat-card:hover{transform:translateY(-4px);box-shadow:0 12px 30px rgba(0,0,0,.08)}
+        .feat-icon{width:56px;height:56px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:1rem}
+
+        /* Scroll Hint */
+        .scroll-hint{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);animation:bounce 2s infinite}
+        @keyframes bounce{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-10px)}}
+
+        /* Responsive */
+        @media(max-width:768px){.brand{font-size:2.5rem}.clock-display{font-size:2.2rem}.section-title{font-size:1.5rem}.btn-ponto-big{font-size:1rem;padding:.7rem 1.5rem}}
+
+        /* Smooth scroll */
+        html{scroll-behavior:smooth}
+        ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+        /* Demo banner */
+        .demo-banner{background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;text-align:center;padding:.5rem;font-weight:600;font-size:.8rem;letter-spacing:.03em}
+    </style>
+</head>
+<body>
+
+<!-- ======= DEMO BANNER ======= -->
+<div class="demo-banner">
+    <i class="bi bi-eye me-1"></i> DEMO — Visualização estática do sistema Pontto
+</div>
+
+<!-- ======= HERO ======= -->
+<section class="hero">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="container hero-content text-center text-white">
+        <div class="brand mb-3">Pont<span class="dot"></span>to</div>
+        <p class="fs-5 mb-2 fw-light opacity-90">Sistema Inteligente de Ponto Eletrônico</p>
+        <p class="opacity-75 mb-4" style="max-width:550px;margin:0 auto">Gamificação, wellness tracking, analytics em tempo real e muito mais — tudo em uma interface premium.</p>
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+            <a href="#dashboard-demo" class="btn btn-light btn-lg fw-bold px-4" style="border-radius:50px">
+                <i class="bi bi-grid-1x2 me-2"></i>Ver Dashboard
+            </a>
+            <a href="https://github.com/jovemegidio/Pontto" class="btn btn-outline-light btn-lg fw-bold px-4" style="border-radius:50px" target="_blank">
+                <i class="bi bi-github me-2"></i>Código Fonte
+            </a>
+        </div>
+        <div class="scroll-hint mt-5">
+            <i class="bi bi-chevron-double-down text-white fs-4 opacity-50"></i>
+        </div>
+    </div>
+</section>
+
+<!-- ======= FEATURES ======= -->
+<section class="section" id="features">
+    <div class="container">
+        <div class="text-center mb-5">
+            <div class="section-title">Mais que um ponto eletrônico</div>
+            <p class="section-sub mx-auto">Funcionalidades exclusivas que transformam o registro de jornada em uma ferramenta de bem-estar e produtividade.</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4 col-sm-6">
+                <div class="feat-card">
+                    <div class="feat-icon" style="background:rgba(236,72,153,.1);color:#ec4899"><i class="bi bi-heart-pulse"></i></div>
+                    <h6 class="fw-bold">Mood & Energy Tracker</h6>
+                    <p class="text-muted small mb-0">Registre humor e energia diariamente. Dados reais para prevenir burnout antes que aconteça.</p>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-6">
+                <div class="feat-card">
+                    <div class="feat-icon" style="background:rgba(245,158,11,.1);color:#f59e0b"><i class="bi bi-trophy"></i></div>
+                    <h6 class="fw-bold">Gamificação Real</h6>
+                    <p class="text-muted small mb-0">XP por batida, níveis progressivos, streaks de pontualidade e 10 conquistas desbloqueáveis.</p>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-6">
+                <div class="feat-card">
+                    <div class="feat-icon" style="background:rgba(16,185,129,.1);color:#10b981"><i class="bi bi-shield-check"></i></div>
+                    <h6 class="fw-bold">Wellness Score</h6>
+                    <p class="text-muted small mb-0">Índice de 0 a 100 que cruza humor, energia e padrões de jornada para cada colaborador.</p>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-6">
+                <div class="feat-card">
+                    <div class="feat-icon" style="background:rgba(59,130,246,.1);color:#3b82f6"><i class="bi bi-bullseye"></i></div>
+                    <h6 class="fw-bold">Focus Timer</h6>
+                    <p class="text-muted small mb-0">Pomodoro integrado ao sistema. Timer configurável com XP automático por sessão completada.</p>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-6">
+                <div class="feat-card">
+                    <div class="feat-icon" style="background:rgba(99,102,241,.1);color:#6366f1"><i class="bi bi-broadcast"></i></div>
+                    <h6 class="fw-bold">Team Heatmap</h6>
+                    <p class="text-muted small mb-0">Mapa de presença em tempo real. Saiba quem está presente, no almoço ou ausente — ao vivo.</p>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-6">
+                <div class="feat-card">
+                    <div class="feat-icon" style="background:rgba(239,68,68,.1);color:#ef4444"><i class="bi bi-graph-up-arrow"></i></div>
+                    <h6 class="fw-bold">Analytics Inteligentes</h6>
+                    <p class="text-muted small mb-0">Gráficos de horas semanais, tendência de humor, saldo mensal e relatórios administrativos.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ======= DASHBOARD DEMO ======= -->
+<section class="section" style="background:var(--bg)" id="dashboard-demo">
+<div class="container-fluid px-3 px-lg-4">
+
+    <!-- Demo Navbar -->
+    <nav class="demo-nav navbar navbar-dark mb-4" style="border-radius:16px;overflow:hidden">
+        <div class="container-fluid px-3">
+            <a class="nav-brand" href="#">Pont<span class="dot"></span>to</a>
+            <div class="d-flex align-items-center gap-3">
+                <button class="theme-toggle" onclick="toggleDemoTheme()"><i class="bi bi-moon-stars" id="themeIcon"></i></button>
+                <span class="streak-badge bg-warning bg-opacity-25 text-warning" style="font-size:.8rem"><span style="animation:pdot 1s infinite alternate">🔥</span> 12</span>
+                <div class="d-flex align-items-center gap-2">
+                    <div class="avatar" style="background:#8b5cf6">AD</div>
+                    <div class="d-none d-md-block">
+                        <div class="text-white fw-semibold" style="font-size:.8rem;line-height:1">Administrador</div>
+                        <div class="text-white-50" style="font-size:.65rem">Nível 3 · 245 XP</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Clock + Register -->
+    <div class="pc mb-4">
+        <div class="card-body text-center py-4">
+            <p class="text-muted mb-1 fw-medium" id="demoDate"></p>
+            <div class="clock-display" id="demoClock">--:--:--</div>
+            <div class="mt-3">
+                <button class="btn btn-success btn-ponto-big" onclick="demoRegister(this)">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>Registrar Entrada
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="row mb-4 g-3">
+        <div class="col-md-3 col-6">
+            <div class="pc stat-card">
+                <div class="stat-icon" style="background:rgba(99,102,241,.1);color:var(--p)"><i class="bi bi-clock-history"></i></div>
+                <div class="stat-number" style="color:var(--p)">6:42</div>
+                <div class="stat-label">Horas Hoje</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="pc stat-card">
+                <div class="stat-icon" style="background:rgba(16,185,129,.1);color:var(--ok)"><i class="bi bi-check2-all"></i></div>
+                <div class="stat-number" style="color:var(--ok)">3/4</div>
+                <div class="stat-label">Registros</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="pc stat-card">
+                <div class="stat-icon" style="background:rgba(245,158,11,.1);color:var(--acc)"><i class="bi bi-fire"></i></div>
+                <div class="stat-number" style="color:var(--acc)">12</div>
+                <div class="stat-label">Streak (dias)</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="pc stat-card">
+                <div class="wellness-ring">
+                    <svg width="110" height="110" viewBox="0 0 120 120">
+                        <circle cx="60" cy="60" r="50" fill="none" stroke="var(--border)" stroke-width="8"/>
+                        <circle cx="60" cy="60" r="50" fill="none" stroke="var(--ok)" stroke-width="8" stroke-linecap="round" stroke-dasharray="246 314"/>
+                    </svg>
+                    <div class="rt"><div class="rn">78</div><div class="rl">Wellness</div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="row mb-4 g-3">
+        <!-- Registros -->
+        <div class="col-lg-5">
+            <div class="pc h-100">
+                <div class="card-header"><i class="bi bi-list-check me-2"></i>Registros de Hoje</div>
+                <div class="card-body p-0">
+                    <table class="table ptable mb-0">
+                        <thead><tr><th>Tipo</th><th>Horário</th><th>Obs</th></tr></thead>
+                        <tbody>
+                            <tr><td><span class="badge badge-tipo tipo-entrada"><i class="bi bi-box-arrow-in-right me-1"></i>Entrada</span></td><td class="fw-bold">08:02:14</td><td class="text-muted small">—</td></tr>
+                            <tr><td><span class="badge badge-tipo tipo-saida_almoco"><i class="bi bi-cup-hot me-1"></i>Saída Almoço</span></td><td class="fw-bold">12:01:33</td><td class="text-muted small">—</td></tr>
+                            <tr><td><span class="badge badge-tipo tipo-volta_almoco"><i class="bi bi-arrow-return-left me-1"></i>Volta Almoço</span></td><td class="fw-bold">13:05:47</td><td class="text-muted small">—</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mood -->
+        <div class="col-lg-4">
+            <div class="pc h-100">
+                <div class="card-header"><i class="bi bi-emoji-smile me-2"></i>Como você está?</div>
+                <div class="card-body">
+                    <p class="text-muted small mb-3">Registre seu humor e energia do dia.</p>
+                    <div class="mb-3 text-center">
+                        <label class="form-label fw-semibold small text-uppercase d-block">Humor</label>
+                        <div class="d-flex justify-content-center gap-2">
+                            <span class="mood-btn" onclick="selectDemo(this)">😞</span>
+                            <span class="mood-btn" onclick="selectDemo(this)">😕</span>
+                            <span class="mood-btn active" onclick="selectDemo(this)">😐</span>
+                            <span class="mood-btn" onclick="selectDemo(this)">😊</span>
+                            <span class="mood-btn" onclick="selectDemo(this)">😄</span>
+                        </div>
+                    </div>
+                    <div class="mb-3 text-center">
+                        <label class="form-label fw-semibold small text-uppercase d-block">Energia</label>
+                        <div class="d-flex justify-content-center gap-2">
+                            <span class="mood-btn" onclick="selectDemo(this)">🔋</span>
+                            <span class="mood-btn" onclick="selectDemo(this)">🪫</span>
+                            <span class="mood-btn active" onclick="selectDemo(this)">⚡</span>
+                            <span class="mood-btn" onclick="selectDemo(this)">🔥</span>
+                            <span class="mood-btn" onclick="selectDemo(this)">🚀</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-pontto btn-sm w-100"><i class="bi bi-heart-pulse me-1"></i>Registrar Humor</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Focus -->
+        <div class="col-lg-3">
+            <div class="pc h-100">
+                <div class="card-header"><i class="bi bi-bullseye me-2"></i>Focus Timer</div>
+                <div class="card-body text-center">
+                    <div class="focus-circle mb-3" id="demoFocusCircle">
+                        <div class="focus-time" id="demoFocusTime">25:00</div>
+                        <small class="text-muted fw-medium">MINUTOS</small>
+                    </div>
+                    <div class="d-flex justify-content-center gap-2 mb-2">
+                        <button class="btn btn-sm btn-pontto" onclick="toggleDemoFocus()" id="demoFocusBtn"><i class="bi bi-play-fill"></i> Iniciar</button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="resetDemoFocus()"><i class="bi bi-arrow-clockwise"></i></button>
+                    </div>
+                    <p class="text-muted small mb-0"><i class="bi bi-bullseye me-1"></i>3 sessões hoje</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart + Conquistas -->
+    <div class="row mb-4 g-3">
+        <div class="col-lg-8">
+            <div class="pc"><div class="card-header"><i class="bi bi-graph-up me-2"></i>Horas esta Semana</div><div class="card-body"><canvas id="demoChart" height="200"></canvas></div></div>
+        </div>
+        <div class="col-lg-4">
+            <div class="pc h-100">
+                <div class="card-header"><i class="bi bi-trophy me-2"></i>Conquistas Recentes</div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center gap-3 mb-3 pb-3 border-bottom">
+                        <span style="font-size:1.7rem">🔥</span>
+                        <div><div class="fw-bold" style="font-size:.85rem">Dedicação</div><div class="text-muted" style="font-size:.72rem">10 dias consecutivos no ponto</div></div>
+                    </div>
+                    <div class="d-flex align-items-center gap-3 mb-3 pb-3 border-bottom">
+                        <span style="font-size:1.7rem">⏰</span>
+                        <div><div class="fw-bold" style="font-size:.85rem">Pontualidade</div><div class="text-muted" style="font-size:.72rem">5 entradas antes das 9:00</div></div>
+                    </div>
+                    <div class="d-flex align-items-center gap-3 mb-3 pb-3 border-bottom">
+                        <span style="font-size:1.7rem">🎯</span>
+                        <div><div class="fw-bold" style="font-size:.85rem">Mestre do Foco</div><div class="text-muted" style="font-size:.72rem">Completou 10 sessões de foco</div></div>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <span style="font-size:1.7rem">👣</span>
+                        <div><div class="fw-bold" style="font-size:.85rem">Primeiro Passo</div><div class="text-muted" style="font-size:.72rem">Registrou seu primeiro ponto</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Team Presence (Admin Panel Preview) -->
+    <div class="pc mb-4">
+        <div class="card-header d-flex align-items-center gap-2">
+            <i class="bi bi-broadcast me-2"></i>Presença da Equipe (Admin)
+            <span class="badge bg-success bg-opacity-10 text-success ms-auto" style="border-radius:50px;font-size:.72rem"><i class="bi bi-circle-fill me-1" style="font-size:.45rem"></i>Ao vivo</span>
+        </div>
+        <div class="card-body">
+            <div class="row g-2" id="teamGrid">
+            </div>
+        </div>
+    </div>
+
+    <!-- Conquistas Gallery -->
+    <div class="pc mb-4">
+        <div class="card-header"><i class="bi bi-trophy me-2"></i>Galeria de Conquistas</div>
+        <div class="card-body">
+            <div class="row g-3" id="conquistasGrid"></div>
+        </div>
+    </div>
+
+</div>
+</section>
+
+<!-- ======= TECH STACK ======= -->
+<section class="section">
+    <div class="container">
+        <div class="text-center mb-5">
+            <div class="section-title">Stack Técnica</div>
+            <p class="section-sub mx-auto">Construído com tecnologias modernas, confiáveis e escaláveis.</p>
+        </div>
+        <div class="row g-3 justify-content-center">
+            <div class="col-auto"><div class="pc px-4 py-3 text-center"><img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python"></div></div>
+            <div class="col-auto"><div class="pc px-4 py-3 text-center"><img src="https://img.shields.io/badge/Flask-000000?style=for-the-badge&logo=flask&logoColor=white" alt="Flask"></div></div>
+            <div class="col-auto"><div class="pc px-4 py-3 text-center"><img src="https://img.shields.io/badge/SQLAlchemy-D71F00?style=for-the-badge&logo=sqlalchemy&logoColor=white" alt="SQLAlchemy"></div></div>
+            <div class="col-auto"><div class="pc px-4 py-3 text-center"><img src="https://img.shields.io/badge/Bootstrap-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white" alt="Bootstrap"></div></div>
+            <div class="col-auto"><div class="pc px-4 py-3 text-center"><img src="https://img.shields.io/badge/Chart.js-FF6384?style=for-the-badge&logo=chartdotjs&logoColor=white" alt="Chart.js"></div></div>
+            <div class="col-auto"><div class="pc px-4 py-3 text-center"><img src="https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite"></div></div>
+        </div>
+    </div>
+</section>
+
+<!-- ======= FOOTER ======= -->
+<footer style="background:var(--grad);color:white;padding:3rem 0;text-align:center">
+    <div class="container">
+        <div style="font-size:1.8rem;font-weight:900;letter-spacing:-1px;margin-bottom:.5rem">Pont<span class="dot"></span>to</div>
+        <p class="opacity-75 mb-3">Sistema Inteligente de Ponto Eletrônico</p>
+        <a href="https://github.com/jovemegidio/Pontto" class="btn btn-outline-light fw-bold px-4" style="border-radius:50px" target="_blank">
+            <i class="bi bi-github me-2"></i>Ver no GitHub
+        </a>
+        <p class="mt-4 mb-0 opacity-50" style="font-size:.8rem">Desenvolvido por <strong>jovemegidio</strong></p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+// ===== Clock =====
+function updateClock(){const n=new Date();document.getElementById('demoClock').textContent=[n.getHours(),n.getMinutes(),n.getSeconds()].map(v=>String(v).padStart(2,'0')).join(':');
+const dias=['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+const meses=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+document.getElementById('demoDate').textContent=dias[n.getDay()]+', '+n.getDate()+' de '+meses[n.getMonth()]+' de '+n.getFullYear()}
+updateClock();setInterval(updateClock,1000);
+
+// ===== Theme =====
+function toggleDemoTheme(){const t=document.documentElement.getAttribute('data-bs-theme')==='dark'?'light':'dark';document.documentElement.setAttribute('data-bs-theme',t);document.getElementById('themeIcon').className='bi bi-'+(t==='dark'?'sun':'moon-stars')}
+
+// ===== Mood Select =====
+function selectDemo(el){el.parentNode.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active')}
+
+// ===== Demo Register =====
+const regTypes=[{label:'Saída Almoço',cls:'btn-pontto',icon:'bi-cup-hot'},{label:'Volta Almoço',cls:'btn-pontto',icon:'bi-arrow-return-left'},{label:'Saída',cls:'btn-danger',icon:'bi-box-arrow-right'}];
+let regIdx=0;
+function demoRegister(btn){if(regIdx<regTypes.length){const r=regTypes[regIdx];btn.className='btn btn-ponto-big '+r.cls;btn.innerHTML='<i class="bi '+r.icon+' me-2"></i>Registrar '+r.label;regIdx++}else{btn.disabled=true;btn.innerHTML='<i class="bi bi-check-circle me-2"></i>Dia Completo';btn.className='btn btn-ponto-big btn-secondary'}}
+
+// ===== Focus Timer =====
+let demoFocusRunning=false,demoFocusTime=25*60,demoFocusInterval;
+function updateDemoFocus(){const m=Math.floor(demoFocusTime/60),s=demoFocusTime%60;document.getElementById('demoFocusTime').textContent=String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')}
+function toggleDemoFocus(){if(demoFocusRunning){clearInterval(demoFocusInterval);demoFocusRunning=false;document.getElementById('demoFocusCircle').classList.remove('running');document.getElementById('demoFocusBtn').innerHTML='<i class="bi bi-play-fill"></i> Continuar'}else{demoFocusRunning=true;document.getElementById('demoFocusCircle').classList.add('running');document.getElementById('demoFocusBtn').innerHTML='<i class="bi bi-pause-fill"></i> Pausar';demoFocusInterval=setInterval(()=>{demoFocusTime--;updateDemoFocus();if(demoFocusTime<=0){clearInterval(demoFocusInterval);demoFocusRunning=false;demoFocusTime=25*60;updateDemoFocus();document.getElementById('demoFocusCircle').classList.remove('running');document.getElementById('demoFocusBtn').innerHTML='<i class="bi bi-play-fill"></i> Iniciar'}},1000)}}
+function resetDemoFocus(){clearInterval(demoFocusInterval);demoFocusRunning=false;demoFocusTime=25*60;updateDemoFocus();document.getElementById('demoFocusCircle').classList.remove('running');document.getElementById('demoFocusBtn').innerHTML='<i class="bi bi-play-fill"></i> Iniciar'}
+
+// ===== Chart =====
+new Chart(document.getElementById('demoChart'),{type:'bar',data:{labels:['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'],datasets:[{label:'Horas',data:[8.2,7.8,8.5,8.1,6.7,0,0],backgroundColor:'rgba(99,102,241,0.7)',borderColor:'#6366f1',borderWidth:2,borderRadius:8,borderSkipped:false},{label:'Meta (8h)',data:[8,8,8,8,8,8,8],type:'line',borderColor:'#f59e0b',borderDash:[5,5],pointRadius:0,borderWidth:2,fill:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{usePointStyle:true,padding:15}}},scales:{y:{beginAtZero:true,max:12,grid:{color:'rgba(0,0,0,0.05)'}},x:{grid:{display:false}}}}});
+
+// ===== Team Presence =====
+const team=[
+    {nome:'Ana Silva',init:'AS',cor:'#6366f1',dept:'Design',status:'presente',hora:'08:05'},
+    {nome:'Carlos Mendes',init:'CM',cor:'#10b981',dept:'Engenharia',status:'presente',hora:'07:58'},
+    {nome:'Julia Santos',init:'JS',cor:'#ec4899',dept:'Marketing',status:'almoco',hora:'12:02'},
+    {nome:'Pedro Costa',init:'PC',cor:'#f59e0b',dept:'Comercial',status:'presente',hora:'08:15'},
+    {nome:'Maria Oliveira',init:'MO',cor:'#8b5cf6',dept:'RH',status:'presente',hora:'08:00'},
+    {nome:'Lucas Ferreira',init:'LF',cor:'#ef4444',dept:'Engenharia',status:'ausente',hora:null},
+    {nome:'Beatriz Lima',init:'BL',cor:'#14b8a6',dept:'Financeiro',status:'presente',hora:'08:10'},
+    {nome:'Rafael Souza',init:'RS',cor:'#3b82f6',dept:'Suporte',status:'presente',hora:'07:55'},
+];
+const statusLabel={presente:'Presente',almoco:'Almoço',ausente:'Ausente'};
+let thtml='';team.forEach(u=>{thtml+=`<div class="col-lg-3 col-md-4 col-sm-6"><div class="d-flex align-items-center gap-2 p-2 rounded-3" style="border:1px solid var(--border)"><div class="avatar" style="background:${u.cor}">${u.init}</div><div><div class="fw-semibold" style="font-size:.82rem">${u.nome}</div><div class="d-flex align-items-center gap-1"><span class="presence-dot ${u.status}"></span><small class="text-muted">${statusLabel[u.status]}${u.hora?' · '+u.hora:''}</small></div></div></div></div>`});
+document.getElementById('teamGrid').innerHTML=thtml;
+
+// ===== Conquistas =====
+const conquistas=[
+    {icon:'👣',nome:'Primeiro Passo',desc:'Registrou seu primeiro ponto',xp:10,cor:'#22c55e',unlocked:true},
+    {icon:'🔥',nome:'Constância',desc:'5 dias consecutivos',xp:25,cor:'#f59e0b',unlocked:true},
+    {icon:'💪',nome:'Dedicação',desc:'10 dias consecutivos',xp:50,cor:'#ef4444',unlocked:true},
+    {icon:'🏆',nome:'Inabalável',desc:'30 dias consecutivos',xp:150,cor:'#8b5cf6',unlocked:false},
+    {icon:'⏰',nome:'Pontualidade',desc:'5 entradas antes das 9:00',xp:30,cor:'#3b82f6',unlocked:true},
+    {icon:'🎯',nome:'Mestre do Foco',desc:'10 sessões de foco',xp:40,cor:'#ec4899',unlocked:true},
+    {icon:'🌅',nome:'Madrugador',desc:'Entrada antes das 7:30',xp:20,cor:'#f97316',unlocked:false},
+    {icon:'🧘',nome:'Equilíbrio',desc:'Wellness 85+ por 7 dias',xp:60,cor:'#14b8a6',unlocked:false},
+    {icon:'💯',nome:'Centurião',desc:'Alcançou 100 XP',xp:25,cor:'#6366f1',unlocked:true},
+    {icon:'🎖️',nome:'Veterano',desc:'Ponto por 60 dias',xp:100,cor:'#a855f7',unlocked:false},
+];
+let chtml='';conquistas.forEach(c=>{chtml+=`<div class="col-lg-2 col-md-3 col-sm-4 col-6"><div class="conquista-card ${c.unlocked?'desbloqueada':'bloqueada'}"><span style="font-size:2.2rem;display:block;margin-bottom:.4rem">${c.icon}</span><div class="fw-bold" style="font-size:.8rem">${c.nome}</div><div class="text-muted" style="font-size:.68rem">${c.desc}</div><span class="badge mt-2" style="background:${c.cor};color:#fff;border-radius:50px;font-size:.65rem">+${c.xp} XP</span></div></div>`});
+document.getElementById('conquistasGrid').innerHTML=chtml;
+</script>
+</body>
+</html>

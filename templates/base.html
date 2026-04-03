@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-bs-theme="{{ current_user.tema if current_user.is_authenticated and current_user.tema == 'dark' else 'light' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Pontto{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root{--p-primary:#6366f1;--p-primary-light:#818cf8;--p-primary-dark:#4f46e5;--p-accent:#f59e0b;--p-success:#10b981;--p-danger:#ef4444;--p-info:#3b82f6;--p-surface:#ffffff;--p-bg:#f8fafc;--p-text:#0f172a;--p-muted:#64748b;--p-border:#e2e8f0;--p-shadow:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);--p-shadow-lg:0 10px 25px rgba(0,0,0,.08);--p-radius:16px;--p-radius-sm:10px;--p-grad:linear-gradient(135deg,#6366f1,#8b5cf6,#a78bfa)}
+        [data-bs-theme="dark"]{--p-surface:#1e1b4b;--p-bg:#0f0d2e;--p-text:#e2e8f0;--p-muted:#94a3b8;--p-border:#312e81;--p-shadow:0 1px 3px rgba(0,0,0,.3);--p-shadow-lg:0 10px 25px rgba(0,0,0,.4)}
+        *{font-family:'Inter',system-ui,-apple-system,sans-serif}
+        body{background:var(--p-bg);color:var(--p-text);overflow-x:hidden}
+        .pontto-nav{background:var(--p-grad);padding:.6rem 0;box-shadow:0 4px 20px rgba(99,102,241,.3);position:sticky;top:0;z-index:1050}
+        .pontto-nav .navbar-brand{font-weight:800;font-size:1.4rem;letter-spacing:-.5px;display:flex;align-items:center;gap:.5rem}
+        .brand-dot{width:8px;height:8px;background:var(--p-accent);border-radius:50%;display:inline-block;animation:pdot 2s infinite}
+        @keyframes pdot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+        .pontto-nav .nav-link{font-weight:500;font-size:.9rem;padding:.5rem .9rem!important;border-radius:var(--p-radius-sm);transition:.2s}
+        .pontto-nav .nav-link:hover{background:rgba(255,255,255,.15)}
+        .avatar{width:36px;height:36px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;color:#fff;flex-shrink:0}
+        .pc{background:var(--p-surface);border:1px solid var(--p-border);border-radius:var(--p-radius);box-shadow:var(--p-shadow);transition:all .3s cubic-bezier(.4,0,.2,1);overflow:hidden}
+        .pc:hover{box-shadow:var(--p-shadow-lg);transform:translateY(-2px)}
+        .pc .card-header{background:0 0;border-bottom:1px solid var(--p-border);padding:1.2rem 1.5rem;font-weight:700;font-size:.95rem}
+        .pc .card-body{padding:1.5rem}
+        .stat-card{text-align:center;padding:1.5rem 1rem;position:relative;overflow:hidden}
+        .stat-card .stat-icon{width:48px;height:48px;border-radius:14px;display:inline-flex;align-items:center;justify-content:center;font-size:1.3rem;margin-bottom:.8rem}
+        .stat-card .stat-number{font-size:2rem;font-weight:800;line-height:1.1;letter-spacing:-1px}
+        .stat-card .stat-label{color:var(--p-muted);font-size:.78rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-top:.3rem}
+        .btn-pontto{background:var(--p-grad);border:none;color:#fff;font-weight:600;padding:.6rem 1.5rem;border-radius:var(--p-radius-sm);transition:.3s;box-shadow:0 4px 15px rgba(99,102,241,.3)}
+        .btn-pontto:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(99,102,241,.4);color:#fff}
+        .btn-ponto-big{font-size:1.2rem;padding:1rem 3rem;border-radius:50px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;position:relative;overflow:hidden}
+        .btn-ponto-big::after{content:'';position:absolute;top:50%;left:50%;width:0;height:0;border-radius:50%;background:rgba(255,255,255,.2);transition:.5s;transform:translate(-50%,-50%)}
+        .btn-ponto-big:hover::after{width:300px;height:300px}
+        .clock-display{font-size:4rem;font-weight:900;letter-spacing:-2px;font-variant-numeric:tabular-nums;background:var(--p-grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .badge-tipo{font-size:.75rem;padding:.4em .8em;border-radius:8px;font-weight:600}
+        .tipo-entrada{background:linear-gradient(135deg,#10b981,#059669);color:#fff}
+        .tipo-saida_almoco{background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff}
+        .tipo-volta_almoco{background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff}
+        .tipo-saida{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff}
+        .ptable th{background:var(--p-bg);font-weight:700;font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:var(--p-muted);padding:.9rem 1rem;border:none}
+        .ptable td{padding:.9rem 1rem;border-color:var(--p-border);vertical-align:middle}
+        .wellness-ring{width:120px;height:120px;position:relative;margin:0 auto}
+        .wellness-ring svg{transform:rotate(-90deg)}
+        .wellness-ring .ring-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
+        .wellness-ring .ring-number{font-size:1.8rem;font-weight:800;line-height:1}
+        .wellness-ring .ring-label{font-size:.65rem;color:var(--p-muted);text-transform:uppercase;font-weight:600;letter-spacing:.05em}
+        .mood-btn{width:48px;height:48px;border-radius:50%;border:3px solid var(--p-border);background:var(--p-surface);font-size:1.3rem;cursor:pointer;transition:.2s;display:inline-flex;align-items:center;justify-content:center}
+        .mood-btn:hover,.mood-btn.active{transform:scale(1.2);border-color:var(--p-primary);box-shadow:0 0 0 4px rgba(99,102,241,.15)}
+        .streak-badge{display:inline-flex;align-items:center;gap:.4rem;padding:.4rem 1rem;border-radius:50px;font-weight:700;font-size:.9rem}
+        .streak-fire{animation:firepulse 1s infinite alternate}
+        @keyframes firepulse{from{transform:scale(1)}to{transform:scale(1.15)}}
+        .conquista-card{text-align:center;padding:1.2rem;border-radius:var(--p-radius);border:2px solid var(--p-border);transition:.3s}
+        .conquista-card.desbloqueada{border-color:var(--p-accent);background:linear-gradient(135deg,rgba(245,158,11,.05),rgba(99,102,241,.05))}
+        .conquista-card.bloqueada{opacity:.4;filter:grayscale(.8)}
+        .conquista-card .conquista-icon{font-size:2.5rem;display:block;margin-bottom:.5rem}
+        .xp-bar-container{background:var(--p-border);border-radius:50px;height:8px;overflow:hidden}
+        .xp-bar-fill{height:100%;border-radius:50px;background:var(--p-grad);transition:width .5s ease}
+        .focus-circle{width:200px;height:200px;border-radius:50%;border:6px solid var(--p-border);display:flex;align-items:center;justify-content:center;flex-direction:column;margin:0 auto;position:relative}
+        .focus-circle.running{border-color:var(--p-primary);animation:fglow 2s infinite alternate}
+        @keyframes fglow{from{box-shadow:0 0 10px rgba(99,102,241,.2)}to{box-shadow:0 0 30px rgba(99,102,241,.4)}}
+        .focus-time{font-size:3rem;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-1px}
+        .presence-dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+        .presence-dot.presente{background:#10b981;box-shadow:0 0 6px rgba(16,185,129,.5)}
+        .presence-dot.almoco{background:#f59e0b}.presence-dot.saiu{background:#94a3b8}.presence-dot.ausente{background:#e2e8f0}
+        .theme-toggle{background:rgba(255,255,255,.15);border:none;color:#fff;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.2s}
+        .theme-toggle:hover{background:rgba(255,255,255,.25)}
+        .fade-in{animation:fadeIn .5s ease-out}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+        @media(max-width:768px){.clock-display{font-size:2.5rem}.btn-ponto-big{font-size:1rem;padding:.8rem 1.5rem}.focus-circle{width:150px;height:150px}.focus-time{font-size:2rem}}
+        ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--p-bg)}::-webkit-scrollbar-thumb{background:var(--p-border);border-radius:3px}
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% if current_user.is_authenticated %}
+    <nav class="navbar navbar-expand-lg navbar-dark pontto-nav">
+        <div class="container-fluid px-3 px-lg-4">
+            <a class="navbar-brand text-white" href="{{ url_for('ponto.dashboard') }}">
+                Pont<span class="brand-dot"></span>to
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto gap-1">
+                    <li class="nav-item"><a class="nav-link text-white" href="{{ url_for('ponto.dashboard') }}"><i class="bi bi-grid-1x2 me-1"></i>Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="{{ url_for('ponto.historico') }}"><i class="bi bi-calendar3 me-1"></i>Histórico</a></li>
+                    <li class="nav-item"><a class="nav-link text-white" href="{{ url_for('ponto.conquistas') }}"><i class="bi bi-trophy me-1"></i>Conquistas</a></li>
+                    {% if current_user.is_admin %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link text-white dropdown-toggle" href="#" data-bs-toggle="dropdown"><i class="bi bi-shield-check me-1"></i>Admin</a>
+                        <ul class="dropdown-menu dropdown-menu-dark">
+                            <li><a class="dropdown-item" href="{{ url_for('admin.painel') }}"><i class="bi bi-speedometer2 me-2"></i>Painel</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('admin.funcionarios') }}"><i class="bi bi-people me-2"></i>Funcionários</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('admin.relatorio') }}"><i class="bi bi-bar-chart-line me-2"></i>Relatórios</a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+                </ul>
+                <ul class="navbar-nav align-items-center gap-2">
+                    <li class="nav-item">
+                        <button class="theme-toggle" onclick="toggleTheme()" title="Alternar tema">
+                            <i class="bi bi-{{ 'sun' if current_user.tema == 'dark' else 'moon-stars' }}"></i>
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <span class="streak-badge bg-warning bg-opacity-25 text-warning"><span class="streak-fire">🔥</span> {{ current_user.streak_atual }}</span>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link text-white d-flex align-items-center gap-2 p-1" href="#" data-bs-toggle="dropdown">
+                            <div class="avatar" style="background:{{ current_user.avatar_cor }}">{{ current_user.iniciais }}</div>
+                            <div class="d-none d-lg-block">
+                                <div class="fw-semibold lh-1" style="font-size:.85rem">{{ current_user.nome }}</div>
+                                <div class="text-white-50" style="font-size:.7rem">Nível {{ current_user.nivel }} · {{ current_user.xp }} XP</div>
+                            </div>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark">
+                            <li class="px-3 py-2">
+                                <div class="d-flex justify-content-between mb-1" style="font-size:.75rem"><span>XP</span><span>{{ current_user.xp_percentual }}/100</span></div>
+                                <div class="xp-bar-container"><div class="xp-bar-fill" style="width:{{ current_user.xp_percentual }}%"></div></div>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('auth.perfil') }}"><i class="bi bi-person me-2"></i>Meu Perfil</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('ponto.conquistas') }}"><i class="bi bi-trophy me-2"></i>Conquistas</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Sair</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+    <div class="container-fluid px-3 px-lg-4 py-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}
+        <div class="row justify-content-center"><div class="col-xl-11">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show border-0 shadow-sm" role="alert" style="border-radius:var(--p-radius-sm)">
+                {% if category == 'success' %}<i class="bi bi-check-circle me-2"></i>{% elif category == 'danger' %}<i class="bi bi-exclamation-triangle me-2"></i>{% elif category == 'warning' %}<i class="bi bi-info-circle me-2"></i>{% endif %}
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        </div></div>{% endif %}{% endwith %}
+        {% block content %}{% endblock %}
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+    function toggleTheme(){fetch('/api/toggle-theme',{method:'POST'}).then(r=>r.json()).then(d=>{document.documentElement.setAttribute('data-bs-theme',d.tema);location.reload()})}
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
